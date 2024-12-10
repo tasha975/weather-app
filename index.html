@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Update App 🍃</title>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet" />
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-pAPOmKpVZx1sNjqkQOn3X4PpRJf06kAfjzQJ5E9mCtG8TtBjJ1xRQ/tXQPIeZVbV7Bm15v1uaVIV3jQyCucjKg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Inline CSS Enhancements -->
+    <style>
+      /* CSS Variables for Consistent Theming */
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #2980b9;
+        --accent-color: #1abc9c;
+        --background-gradient: linear-gradient(135deg, #74ebd5, #acb6e5);
+        --card-bg: #ffffff;
+        --text-color: #333333;
+        --error-color: #e74c3c;
+        --border-radius: 12px;
+        --transition-speed: 0.3s;
+      }
+
+      /* Global Styles */
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: var(--background-gradient);
+        color: var(--text-color);
+      }
+
+      /* Navigation Styles */
+      header {
+        background-color: rgba(255, 255, 255, 0.9);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 10px 20px;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      nav .fa-bars,
+      nav .fa-times {
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary-color);
+      }
+
+      nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 20px;
+      }
+
+      nav ul li a {
+        text-decoration: none;
+        color: var(--primary-color);
+        font-weight: 500;
+        transition: color var(--transition-speed);
+      }
+
+      nav ul li a:hover {
+        color: var(--secondary-color);
+      }
+
+      /* Header Title */
+      .title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 20px 0;
+        color: var(--primary-color);
+      }
+
+      /* User Interface */
+      .user-interface {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .user-interface input {
+        padding: 10px 15px;
+        border: 2px solid #ccc;
+        border-radius: var(--border-radius);
+        outline: none;
+        width: 300px;
+        font-size: 1rem;
+        transition: border-color var(--transition-speed);
+      }
+
+      .user-interface input:focus {
+        border-color: var(--secondary-color);
+      }
+
+      .user-interface button {
+        padding: 10px 20px;
+        background: var(--secondary-color);
+        border: none;
+        border-radius: var(--border-radius);
+        color: #fff;
+        cursor: pointer;
+        transition: background var(--transition-speed);
+        font-size: 1rem;
+      }
+
+      .user-interface button:hover {
+        background: var(--accent-color);
+      }
+
+      /* Weather Sections */
+      section {
+        padding: 40px 20px;
+      }
+
+      .heders {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: var(--primary-color);
+      }
+
+      /* Weather Card */
+      .weather-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto 30px auto;
+        transition: transform var(--transition-speed),
+          box-shadow var(--transition-speed);
+      }
+
+      .weather-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .weather-icon img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .weather-info {
+        text-align: center;
+      }
+
+      .weather-info .location {
+        font-size: 1.8rem;
+        font-weight: 500;
+        color: var(--secondary-color);
+      }
+
+      .weather-info .temperature {
+        font-size: 3rem;
+        font-weight: 500;
+        color: var(--primary-color);
+      }
+
+      .weather-info .description {
+        font-size: 1.2rem;
+        color: #555;
+      }
+
+      .timeLbl {
+        margin-top: 10px;
+        font-size: 1rem;
+        color: #666;
+      }
+
+      /* Tables */
+      .tblW,
+      .tblForcast {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .tblW th,
+      .tblW td,
+      .tblForcast th,
+      .tblForcast td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: center;
+      }
+
+      .tblW th,
+      .tblForcast th {
+        background-color: var(--secondary-color);
+        color: #fff;
+      }
+
+      .tblW td span,
+      .tblForcast td span {
+        display: block;
+        font-size: 1rem;
+        color: var(--text-color);
+      }
+
+      /* Forecast Section */
+      .date-serch {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .date-serch input {
+        padding: 8px 12px;
+        border: 2px solid #ccc;
+        border-radius: var(--border-radius);
+        outline: none;
+        font-size: 1rem;
+      }
+
+      .date-serch button {
+        padding: 8px 16px;
+        background: var(--secondary-color);
+        border: none;
+        border-radius: var(--border-radius);
+        color: #fff;
+        cursor: pointer;
+        transition: background var(--transition-speed);
+        font-size: 1rem;
+      }
+
+      .date-serch button:hover {
+        background: var(--accent-color);
+      }
+
+      /* Map Section */
+      .map-d {
+        height: 400px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      /* News Section */
+      .grid-cols-1.sm\:grid.md\:grid-cols-3 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      @media (min-width: 576px) {
+        .grid-cols-1.sm\:grid.md\:grid-cols-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .story-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        transition: transform var(--transition-speed),
+          box-shadow var(--transition-speed);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .story-card h5 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin-bottom: 15px;
+      }
+
+      .story-card p {
+        flex-grow: 1;
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 15px;
+      }
+
+      .story-card small {
+        font-size: 0.9rem;
+        color: #888;
+      }
+
+      /* Footer */
+      .footer {
+        background-color: #1a202c; /* Dark background */
+        color: #a0aec0; /* Light text */
+        padding: 40px 20px;
+      }
+
+      .footer a {
+        color: var(--secondary-color);
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        color: var(--accent-color);
+      }
+
+      .footer-top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+
+      .footer-about p {
+        color: #a0aec0;
+        margin-top: 10px;
+      }
+
+      .social-links a {
+        color: #a0aec0;
+        font-size: 1.2rem;
+        margin-right: 10px;
+        transition: color var(--transition-speed);
+      }
+
+      .social-links a:hover {
+        color: var(--secondary-color);
+      }
+
+      .footer-contact p {
+        color: #a0aec0;
+        margin: 5px 0;
+      }
+
+      .copyright {
+        margin-top: 30px;
+        color: #a0aec0;
+      }
+
+      .credits {
+        margin-top: 10px;
+        color: #a0aec0;
+      }
+
+      /* Contact Section */
+      .contact .section-title h2 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: var(--primary-color);
+      }
+
+      .php-email-form {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .php-email-form .form-control {
+        border: 2px solid #ccc;
+        border-radius: var(--border-radius);
+        padding: 10px 15px;
+        font-size: 1rem;
+        transition: border-color var(--transition-speed);
+      }
+
+      .php-email-form .form-control:focus {
+        border-color: var(--secondary-color);
+      }
+
+      .php-email-form button {
+        padding: 10px 20px;
+        background: var(--secondary-color);
+        border: none;
+        border-radius: var(--border-radius);
+        color: #fff;
+        cursor: pointer;
+        transition: background var(--transition-speed);
+        font-size: 1rem;
+      }
+
+      .php-email-form button:hover {
+        background: var(--accent-color);
+      }
+
+      /* Responsive Styles */
+      @media (min-width: 768px) {
+        .nav-links {
+          display: block;
+        }
+
+        nav .fa-bars {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-------------------------------- Header -------------------------------->
+    <header>
+      <video autoplay muted loop id="background-video">
+        <source src="img/vd.mp4" type="video/mp4" />
+      </video>
+      <nav class="container d-flex justify-content-between align-items-center">
+        <h2 class="sitename text-primary">weather update App</h2>
+        <div class="nav-links" id="navLnks">
+          <i class="fa fa-times text-primary fs-4" onclick="hideMenu()"></i>
+          <ul class="d-flex flex-column flex-md-row gap-3 mt-3 mt-md-0">
+            <li><a href="#">HOME</a></li>
+            <li><a href="#current-weather">CURRENT</a></li>
+            <li><a href="#weather-forecast">FORECAST</a></li>
+            <li><a href="#news">NEWS</a></li>
+            <li><a href="#weather-map">MAP</a></li>
+            <li><a href="#footer">SUBSCRIBE</a></li>
+          </ul>
+        </div>
+        <i
+          class="fa fa-bars text-primary fs-4 d-block d-md-none"
+          onclick="showMenu()"
+        ></i>
+      </nav>
+      <h1 class="title">🌍 <b>Weather</b> Forecast</h1>
+
+      <div class="user-interface">
+        <input type="text" id="location-input" placeholder="Enter location" />
+        <button id="search-button">Search</button>
+        <!-- <button onclick="darkMode()">DarkMode</button> -->
+      </div>
+    </header>
+    <!-------------------------------- Header END -------------------------------->
+
+    <!-------------------------------- Current Weather ------------------------->
+    <section id="current-weather">
+      <h1 class="heders" style="color: white">Current Weather 🍃</h1>
+      <div class="weather-card">
+        <div class="weather-icon"></div>
+        <div class="weather-info">
+          <h3 class="location name" id="location">Lusaka</h3>
+          <p class="temperature temp_c">25°C</p>
+          <p class="description url">Cloudy</p>
+        </div>
+        <div class="timeLbl" id="local-time">Local Time: --:--</div>
+      </div>
+      <div class="table-responsive">
+        <table class="table tblW">
+          <thead class="table-dark">
+            <tr>
+              <th>📍 Location</th>
+              <th>🌡 Temperature</th>
+              <th>❄️ Humidity</th>
+              <th>🍃 Wind Speed</th>
+              <th>💧 Condition</th>
+              <th>🎗 Region</th>
+              <th>🗺 Country</th>
+              <th>Longitude</th>
+              <th>Latitude</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tz_id">Asia/Colombo</span></td>
+              <td><span class="temp_c">25°C</span></td>
+              <td><span class="humidity">33%</span></td>
+              <td><span class="wind_kph">75.22 KM/H</span></td>
+              <td class="url">Cloudy</td>
+              <td><span class="region">Western</span></td>
+              <td><span class="country">Sri Lanka</span></td>
+              <td><span id="lon">11.33</span></td>
+              <td><span id="lat">20.55</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <!-------------------------------- Current Weather END ------------------------->
+
+    <!-------------------------------- Weather Forecast ------------------------->
+    <section id="weather-forecast">
+      <h1 class="heders" style="color: white">Weather Forecast 🗺</h1>
+
+      <div class="date-serch">
+        <label for="startDate">To:</label>
+        <input id="startDate" type="date" />
+        <label for="endDate">End:</label>
+        <input id="endDate" type="date" />
+        <button onclick="searchForecast()">Search Date</button>
+      </div>
+      <hr />
+      <div class="table-responsive">
+        <table class="table tblForcast text-center">
+          <thead class="table-secondary">
+            <tr>
+              <th>Date</th>
+              <th>Date</th>
+              <th>Date</th>
+              <th>Date</th>
+              <th>Date</th>
+              <th>Date</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong id="date1">2023-02-24</strong></td>
+              <td><strong id="date2">2023-02-25</strong></td>
+              <td><strong id="date3">2023-02-26</strong></td>
+              <td><strong id="date4">2023-02-27</strong></td>
+              <td><strong id="date5">2023-02-28</strong></td>
+              <td><strong id="date6">2023-02-29</strong></td>
+              <td><strong id="date7">2023-02-30</strong></td>
+            </tr>
+            <tr>
+              <td>
+                <img
+                  id="img1"
+                  class="img-fluid"
+                  src="img/icons8-cloud-96.png"
+                  alt="Cloud"
+                />
+              </td>
+              <td>
+                <img
+                  id="img2"
+                  class="img-fluid"
+                  src="img/icons8-cloud-lightning-96.png"
+                  alt="Cloud Lightning"
+                />
+              </td>
+              <td>
+                <img
+                  id="img3"
+                  class="img-fluid"
+                  src="img/icons8-partly-cloudy-day-96.png"
+                  alt="Partly Cloudy"
+                />
+              </td>
+              <td>
+                <img
+                  id="img4"
+                  class="img-fluid"
+                  src="img/icons8-night-wind-96.png"
+                  alt="Night Wind"
+                />
+              </td>
+              <td>
+                <img
+                  id="img5"
+                  class="img-fluid"
+                  src="img/icons8-storm-94.png"
+                  alt="Storm"
+                />
+              </td>
+              <td>
+                <img
+                  id="img6"
+                  class="img-fluid"
+                  src="img/icons8-cloud-lightning-96.png"
+                  alt="Cloud Lightning"
+                />
+              </td>
+              <td>
+                <img
+                  id="img7"
+                  class="img-fluid"
+                  src="img/icons8-night-wind-96.png"
+                  alt="Night Wind"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><strong class="title1">Cloud</strong></td>
+              <td><strong class="title2">Cloud-Lightning</strong></td>
+              <td><strong class="title3">Partly-Cloudy</strong></td>
+              <td><strong class="title4">Night-Wind</strong></td>
+              <td><strong class="title5">Storm</strong></td>
+              <td><strong class="title6">Cloud-Lightning</strong></td>
+              <td><strong class="title7">Night-Wind</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <!-------------------------------- Weather Forecast END ------------------------->
+
+    <!-------------------------------- Map Section ------------------------->
+    <section id="weather-map">
+      <h1 class="heders" style="color: white">Map</h1>
+      <div id="map" class="map-d"></div>
+    </section>
+    <!-------------------------------- Map Section END ------------------------->
+
+    <!-------------------------------- News Cards ------------------------------------------------->
+    <section id="news">
+      <h1 class="heders" style="color: white">Top Stories 🎗</h1>
+      <div class="container">
+        <div class="grid-cols-1 sm:grid md:grid-cols-3">
+          <!-- Story Card 1 -->
+          <div
+            class="mx-3 mt-6 flex flex-col rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <a href="#!" id="a1"></a>
+            <div class="p-6">
+              <h5 id="title1" class="mb-2 text-xl font-medium text-neutral-800">
+                Story Title 1
+              </h5>
+              <p id="p1" class="mb-4 text-base text-neutral-600">
+                This is a wider card with supporting text below as a natural
+                lead-in to additional content. This content is a little bit
+                longer.
+              </p>
+            </div>
+            <div
+              class="mt-auto border-t border-neutral-100 px-6 py-3 text-center"
+            >
+              <small id="ptime1">Last updated 3 mins ago</small>
+            </div>
+          </div>
+          <!-- Story Card 2 -->
+          <div
+            class="mx-3 mt-6 flex flex-col rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <a href="#!" id="a2"></a>
+            <div class="p-6">
+              <h5 id="title2" class="mb-2 text-xl font-medium text-neutral-800">
+                Story Title 2
+              </h5>
+              <p id="p2" class="mb-4 text-base text-neutral-600">
+                This card has supporting text below as a natural lead-in to
+                additional content.
+              </p>
+            </div>
+            <div
+              class="mt-auto border-t border-neutral-100 px-6 py-3 text-center"
+            >
+              <small id="ptime2">Last updated 3 mins ago</small>
+            </div>
+          </div>
+          <!-- Story Card 3 -->
+          <div
+            class="mx-3 mt-6 flex flex-col rounded-lg bg-white shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <a href="#!" id="a3"></a>
+            <div class="p-6">
+              <h5 id="title3" class="mb-2 text-xl font-medium text-neutral-800">
+                Weekly Weather Overview
+              </h5>
+              <p id="p3" class="mb-4 text-base text-neutral-600">
+                This card provides a summary of the weather trends for the
+                upcoming week, with key details and insights to help you plan
+                ahead. Stay tuned for in-depth forecasts and updates.
+              </p>
+            </div>
+            <div
+              class="mt-auto border-t border-neutral-100 px-6 py-3 text-center"
+            >
+              <small id="ptime3">Last updated 3 mins ago</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-------------------------------- News Cards END ------------------------------------------------->
+
+    <!-------------------------------- Contact Section ------------------------->
+    <section id="contact" class="contact section">
+      <div class="container">
+        <h2
+          class="text-3xl font-bold tracking-tight text-center text-primary mb-8"
+        >
+          Contact Us
+        </h2>
+        <div class="row gy-4">
+          <div class="col-lg-5">
+            <div class="info-wrap">
+              <div class="info-item d-flex mb-4">
+                <i
+                  class="bi bi-geo-alt flex-shrink-0 fa fa-map-marker-alt text-secondary fs-4 me-3"
+                ></i>
+                <div>
+                  <h3>Address</h3>
+                  <p>Kairo Road, Lusaka, Zambia, 535022</p>
+                </div>
+              </div>
+              <div class="info-item d-flex mb-4">
+                <i
+                  class="bi bi-telephone flex-shrink-0 fa fa-phone text-secondary fs-4 me-3"
+                ></i>
+                <div>
+                  <h3>Call Us</h3>
+                  <p>0770890549</p>
+                </div>
+              </div>
+              <div class="info-item d-flex mb-4">
+                <i
+                  class="bi bi-envelope flex-shrink-0 fa fa-envelope text-secondary fs-4 me-3"
+                ></i>
+                <div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <form
+              action="forms/contact.php"
+              method="post"
+              class="php-email-form"
+            >
+              <div class="row gy-4">
+                <div class="col-md-6">
+                  <label for="name-field" class="form-label">Your Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="name-field"
+                    class="form-control"
+                    required=""
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="email-field" class="form-label">Your Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    name="email"
+                    id="email-field"
+                    required=""
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <label for="subject-field" class="form-label">Subject</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="subject"
+                    id="subject-field"
+                    required=""
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <label for="message-field" class="form-label">Message</label>
+                  <textarea
+                    class="form-control"
+                    name="message"
+                    rows="10"
+                    id="message-field"
+                    required=""
+                  ></textarea>
+                </div>
+
+                <div class="col-md-12 text-center">
+                  <div class="loading">Loading</div>
+                  <div class="error-message"></div>
+                  <div class="sent-message">
+                    Your message has been sent. Thank you!
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">
+                    Send Message
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!-- End Contact Form -->
+        </div>
+      </div>
+    </section>
+    <!-------------------------------- Contact Section END ------------------------->
+
+    <!-------------------------------- Footer -------------------------------->
+    <footer id="footer" class="footer light-background">
+      <div class="container footer-top">
+        <div class="row gy-4">
+          <!-- Footer About -->
+          <div class="col-lg-5 col-md-12 footer-about">
+            <a href="#" class="logo d-flex align-items-center mb-3">
+              <span class="sitename text-primary">Lusaka</span>
+            </a>
+            <p>
+              Connecting residents, businesses, and visitors through our vibrant
+              online platform.
+            </p>
+            <div class="social-links d-flex mt-4">
+              <a href="#"><i class="bi bi-twitter fa fa-twitter"></i></a>
+              <a href="#"><i class="bi bi-facebook fa fa-facebook"></i></a>
+              <a href="#"><i class="bi bi-instagram fa fa-instagram"></i></a>
+              <a href="#"><i class="bi bi-linkedin fa fa-linkedin"></i></a>
+            </div>
+          </div>
+
+          <!-- Footer Links -->
+          <div class="col-lg-2 col-6 footer-links">
+            <h4 class="text-white">Useful Links</h4>
+            <ul class="list-unstyled">
+              <li><a href="#current-weather">Current Weather</a></li>
+              <li><a href="#weather-forecast">Forecast</a></li>
+              <li><a href="#news">News</a></li>
+              <li><a href="#weather-map">Map</a></li>
+            </ul>
+          </div>
+
+          <div class="col-lg-2 col-6 footer-links">
+            <h4 class="text-white">Our Services</h4>
+            <ul class="list-unstyled">
+              <li><a href="#contact">Contact Us</a></li>
+              <li><a href="#footer">Subscribe</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+
+          <!-- Footer Contact -->
+          <div
+            class="col-lg-3 col-md-12 footer-contact text-center text-md-start"
+          >
+            <p>Lusaka</p>
+            <p class="mt-4">
+              <strong>Phone:</strong> <span>+260770890549</span>
+            </p>
+            <p>
+              <strong>Email:</strong> <span>natashachanda975@gmail.com</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="container text-center mt-4">
+        <p>
+          © <span>Copyright</span>
+          <strong class="px-1 sitename">Lusaka</strong>
+          <span>All Rights Reserved</span>
+        </p>
+        <div class="credits">
+          Designed by <strong>Natasha chanda</strong><br />
+          <p>2401578252</p>
+
+          <a href="https://ICUZAMBIA.NET">ICUZAMBIA</a>
+        </div>
+      </div>
+    </footer>
+    <!-------------------------------- Footer END -------------------------------->
+
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- jQuery -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+
+    <!-- Inline JavaScript Enhancements -->
+    <script>
+      // Navigation Menu Toggle
+      function showMenu() {
+        document.getElementById("navLnks").style.display = "block";
+      }
+
+      function hideMenu() {
+        document.getElementById("navLnks").style.display = "none";
+      }
+
+      // Weather API Configuration
+      const apiKey = "312abfd953c970ceaf81f671079f6e22";
+      const apiUrl =
+        "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+      const searchBox = document.getElementById("location-input");
+      const searchBtn = document.getElementById("search-button");
+      const weatherIcon = document.getElementById("weatherIcon");
+      const locationElement = document.getElementById("location");
+      const temperatureElement = document.querySelector(".temperature");
+      const descriptionElement = document.querySelector(".description");
+      const localTimeElement = document.getElementById("local-time");
+
+      // Current Weather Details Table Elements
+      const tzId = document.querySelector(".tz_id");
+      const tempC = document.querySelector(".temp_c");
+      const humidity = document.querySelector(".humidity");
+      const windKph = document.querySelector(".wind_kph");
+      const condition = document.querySelector(".url");
+      const region = document.querySelector(".region");
+      const country = document.querySelector(".country");
+      const lon = document.getElementById("lon");
+      const lat = document.getElementById("lat");
+
+      // Forecast Table Elements
+      const forecastDates = [
+        { date: "date1", img: "img1", title: "title1" },
+        { date: "date2", img: "img2", title: "title2" },
+        { date: "date3", img: "img3", title: "title3" },
+        { date: "date4", img: "img4", title: "title4" },
+        { date: "date5", img: "img5", title: "title5" },
+        { date: "date6", img: "img6", title: "title6" },
+        { date: "date7", img: "img7", title: "title7" },
+      ];
+
+      async function checkWeather(city) {
+        if (!city) return;
+        try {
+          const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+          if (response.status === 404) {
+            alert("Invalid city name");
+            return;
+          } else {
+            const data = await response.json();
+            // Update Weather Information
+            locationElement.textContent = data.name;
+            temperatureElement.textContent = Math.round(data.main.temp) + "°C";
+            descriptionElement.textContent =
+              data.weather[0].description.charAt(0).toUpperCase() +
+              data.weather[0].description.slice(1);
+            humidity.textContent = data.main.humidity + "%";
+            windKph.textContent = data.wind.speed + " KM/H";
+            condition.textContent = data.weather[0].main;
+            region.textContent = data.sys.country;
+            country.textContent = data.sys.country;
+            lon.textContent = data.coord.lon;
+            lat.textContent = data.coord.lat;
+
+            // Update Weather Icon
+            const weatherMain = data.weather[0].main;
+            const iconMap = {
+              Clouds: "img/icons8-clouds-96.png",
+              Clear: "img/icons8-clear-96.png",
+              Rain: "img/icons8-rain-96.png",
+              Drizzle: "img/icons8-drizzle-96.png",
+              Mist: "img/icons8-mist-96.png",
+              Snow: "img/icons8-snow-96.png",
+              Thunderstorm: "img/icons8-thunderstorm-96.png",
+              // Add more mappings as needed
+            };
+            weatherIcon.src = iconMap[weatherMain] || "img/icons8-wind-96.png";
+
+            // Update Local Time
+            const timezoneOffset = data.timezone; // in seconds
+            const localTime = new Date((data.dt + timezoneOffset) * 1000);
+            localTimeElement.textContent =
+              "Local Time: " + localTime.toLocaleTimeString();
+
+            // Display Sections
+            document.querySelector(".weather-card").style.display = "flex";
+
+            // Update Map
+            updateMap(data.coord.lat, data.coord.lon);
+          }
+        } catch (error) {
+          console.error("Error fetching weather data:", error);
+          alert("An error occurred while fetching weather data.");
+        }
+      }
+
+      searchBtn.addEventListener("click", () => {
+        checkWeather(searchBox.value.trim());
+      });
+
+      searchBox.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          checkWeather(searchBox.value.trim());
+        }
+      });
+
+      // Initialize Map
+      let map = L.map("map").setView([-15.4206208, 28.311552], 10);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
+      let marker = L.marker([-15.4206208, 28.311552]).addTo(map);
+
+      function updateMap(latCoord, lonCoord) {
+        map.setView([latCoord, lonCoord], 10);
+        marker.setLatLng([latCoord, lonCoord]);
+      }
+
+      // Initial Load
+      checkWeather("Lusaka");
+
+      // Forecast Search Function (Placeholder)
+      function searchForecast() {
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        // Implement forecast search functionality here
+        alert(`Searching forecast from ${startDate} to ${endDate}`);
+      }
+    </script>
+  </body>
+</html>
